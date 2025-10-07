@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNO Product Advisor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .question-section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #3498db;
+        }
+
+        .question-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .radio-option:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .radio-option.selected {
+            border-color: #3498db;
+            background: #ebf3fd;
+        }
+
+        .radio-option input {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-option:hover {
+            border-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .checkbox-option.selected {
+            border-color: #27ae60;
+            background: #e8f8f5;
+        }
+
+        .checkbox-option input {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .submit-section {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(52, 152, 219, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-section {
+            display: none;
+            padding: 40px;
+            background: #f8f9fa;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .results-header h2 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .brand-recommendation {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+        }
+
+        .brand-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-products {
+            list-style: none;
+        }
+
+        .brand-products li {
+            padding: 10px 0;
+            border-bottom: 1px solid #ecf0f1;
+            color: #34495e;
+        }
+
+        .brand-products li:last-child {
+            border-bottom: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .success-message {
+            background: #27ae60;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #27ae60, #219a52);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1em;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(39, 174, 96, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .form-container, .results-section {
+                padding: 20px;
+            }
+
+            .question-section {
+                padding: 20px;
+            }
+
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏦 CNO Product Advisor</h1>
+            <p>Personalized Insurance & Financial Product Recommendations</p>
+        </div>
+
+        <form id="consultationForm" class="form-container">
+            <!-- Question 1: Age Range -->
+            <div class="question-section">
+                <div class="question-title">1. What's your age range?</div>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="age_range" value="under_40">
+                        <span>Under 40</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="age_range" value="40_60">
+                        <span>40-60</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="age_range" value="60_plus">
+                        <span>60+</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 2: Employment Status -->
+            <div class="question-section">
+                <div class="question-title">2. What's your current employment status?</div>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="employment_status" value="employed">
+                        <span>Employed</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="employment_status" value="self_employed">
+                        <span>Self-employed</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="employment_status" value="retired">
+                        <span>Retired</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="employment_status" value="nearing_retirement">
+                        <span>Nearing retirement</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 3: Coverage Interests -->
+            <div class="question-section">
+                <div class="question-title">3. What types of coverage are you interested in? (Select all that apply)</div>
+                <div class="checkbox-group">
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="coverage_interests" value="life">
+                        <span>Life Insurance</span>
+                    </label>
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="coverage_interests" value="health">
+                        <span>Health/Medicare</span>
+                    </label>
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="coverage_interests" value="supplemental">
+                        <span>Supplemental Health</span>
+                    </label>
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="coverage_interests" value="retirement">
+                        <span>Retirement Income</span>
+                    </label>
+                    <label class="checkbox-option">
+                        <input type="checkbox" name="coverage_interests" value="employee_benefits">
+                        <span>Employee Benefits</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 4: Dependents -->
+            <div class="question-section">
+                <div class="question-title">4. Do you have dependents (spouse, children, etc.)?</div>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="has_dependents" value="true">
+                        <span>Yes</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="has_dependents" value="false">
+                        <span>No</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 5: Coverage Channel -->
+            <div class="question-section">
+                <div class="question-title">5. How would you prefer to get coverage?</div>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="coverage_channel" value="individual">
+                        <span>Individual/Direct purchase</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="coverage_channel" value="employer">
+                        <span>Through employer</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 6: Priority -->
+            <div class="question-section">
+                <div class="question-title">6. What's your priority when choosing coverage?</div>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="priority" value="low_cost">
+                        <span>Low cost</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="priority" value="balanced">
+                        <span>Balanced coverage and cost</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="priority" value="maximum_coverage">
+                        <span>Maximum coverage</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="submit-section">
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    🎯 Get My Personalized Recommendations
+                </button>
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+            </div>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing your responses and finding the best products for you...</p>
+        </div>
+
+        <div class="results-section" id="results">
+            <div class="results-header">
+                <h2>🎯 Your Personalized Recommendations</h2>
+                <p>Based on your responses, here are the best matching products from CNO Financial Group:</p>
+            </div>
+            <div id="recommendationsContainer"></div>
+            <div style="text-align: center;">
+                <button class="restart-btn" onclick="restartConsultation()">
+                    🔄 Start New Consultation
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Form interaction handling
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle radio button selections
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    // Remove selected class from siblings
+                    const siblings = document.querySelectorAll(`input[name="${this.name}"]`);
+                    siblings.forEach(sibling => {
+                        sibling.closest('.radio-option').classList.remove('selected');
+                    });
+                    // Add selected class to current
+                    this.closest('.radio-option').classList.add('selected');
+                });
+            });
+
+            // Handle checkbox selections
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        this.closest('.checkbox-option').classList.add('selected');
+                    } else {
+                        this.closest('.checkbox-option').classList.remove('selected');
+                    }
+                });
+            });
+
+            // Form submission
+            document.getElementById('consultationForm').addEventListener('submit', handleFormSubmit);
+        });
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {};
+            
+            // Get single-value fields
+            ['age_range', 'employment_status', 'coverage_channel', 'priority'].forEach(field => {
+                data[field] = formData.get(field);
+            });
+            
+            // Get has_dependents as boolean
+            data.has_dependents = formData.get('has_dependents') === 'true';
+            
+            // Get coverage_interests as array
+            data.coverage_interests = formData.getAll('coverage_interests');
+            
+            // Validate form
+            if (!validateForm(data)) {
+                return;
+            }
+            
+            // Show loading
+            document.querySelector('.form-container').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            
+            // Submit to backend
+            fetch('/submit_consultation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                document.getElementById('loading').style.display = 'none';
+                
+                if (result.success) {
+                    displayResults(result.recommendations);
+                } else {
+                    showError('An error occurred: ' + result.error);
+                    document.querySelector('.form-container').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                showError('Network error. Please try again.');
+                document.querySelector('.form-container').style.display = 'block';
+            });
+        }
+
+        function validateForm(data) {
+            const required = ['age_range', 'employment_status', 'coverage_channel', 'priority'];
+            
+            for (let field of required) {
+                if (!data[field]) {
+                    showError(`Please answer all questions. Missing: ${field.replace('_', ' ')}`);
+                    return false;
+                }
+            }
+            
+            if (data.coverage_interests.length === 0) {
+                showError('Please select at least one type of coverage interest.');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function displayResults(recommendations) {
+            const container = document.getElementById('recommendationsContainer');
+            container.innerHTML = '';
+
+            const brandIcons = {
+                'Bankers Life': '🏦',
+                'Colonial Penn': '🏛️',
+                'Washington National': '🏥',
+                'Optavise': '💼',
+                'myHealthPolicy.com': '🔍'
+            };
+
+            recommendations.forEach(rec => {
+                const brandDiv = document.createElement('div');
+                brandDiv.className = 'brand-recommendation';
+                
+                const icon = brandIcons[rec.brand] || '🏢';
+                
+                brandDiv.innerHTML = `
+                    <div class="brand-name">
+                        ${icon} ${rec.brand}
+                    </div>
+                    <ul class="brand-products">
+                        ${rec.products.map(product => `<li>• ${product}</li>`).join('')}
+                    </ul>
+                `;
+                
+                container.appendChild(brandDiv);
+            });
+
+            // Add final message
+            const finalDiv = document.createElement('div');
+            finalDiv.className = 'brand-recommendation';
+            finalDiv.style.background = '#e8f6f3';
+            finalDiv.style.borderLeft = '5px solid #27ae60';
+            finalDiv.innerHTML = `
+                <div class="brand-name">🌟 About CNO Financial Group</div>
+                <p style="color: #2c3e50; line-height: 1.6;">
+                    Each of these brands is part of CNO Financial Group — a trusted insurance company 
+                    serving middle-income Americans with affordable insurance and retirement solutions 
+                    for over 160 years.
+                </p>
+                <br>
+                <div style="color: #2c3e50;">
+                    <strong>💡 Next Steps:</strong><br>
+                    • Contact your preferred brand(s) for detailed quotes<br>
+                    • Speak with a licensed agent for personalized guidance<br>
+                    • Visit cnofinancialgroup.com for more information
+                </div>
+            `;
+            container.appendChild(finalDiv);
+
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function restartConsultation() {
+            // Reset form
+            document.getElementById('consultationForm').reset();
+            
+            // Remove all selected classes
+            document.querySelectorAll('.radio-option, .checkbox-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Show form, hide results
+            document.querySelector('.form-container').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('loading').style.display = 'none';
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>

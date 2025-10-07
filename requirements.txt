@@ -6,5 +6,6 @@ pytest>=7.0.0
 
 # For future enhancements (optional)
 # requests>=2.28.0  # For API integrations
-# flask>=2.3.0      # For web interface
+flask>=2.3.0      # For web interface
+gunicorn>=21.0.0    # For production server
 # nltk>=3.8          # For advanced NLP

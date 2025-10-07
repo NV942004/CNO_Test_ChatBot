@@ -29,3 +29,6 @@ brands_products = {
         ]
     }
 }
+
+# Export as 'products' for backward compatibility with tests
+products = brands_products

@@ -30,14 +30,48 @@ jobs:
       run: |
         python -m pytest tests/ -v || echo "Tests completed with issues - continuing with demo"
     
-    - name: Demo Chatbot Responses
+    - name: Demo CNO Product Advisor
+      run: |
+        python -c "
+        import sys
+        sys.path.append('src')
+        from cno_product_advisor import CNOProductAdvisor
+        
+        print('🎯 CNO Product Advisor Demo')
+        print('=' * 40)
+        
+        # Simulate user responses for demo
+        advisor = CNOProductAdvisor()
+        advisor.user_responses = {
+            'age_range': '60_plus',
+            'employment_status': 'retired',
+            'coverage_interests': ['life', 'health'],
+            'has_dependents': True,
+            'coverage_channel': 'individual',
+            'priority': 'balanced'
+        }
+        
+        print('Demo user profile:')
+        print('- Age: 60+')
+        print('- Status: Retired')
+        print('- Interests: Life Insurance, Health/Medicare')
+        print('- Has dependents: Yes')
+        print('- Channel: Individual')
+        print('- Priority: Balanced')
+        print()
+        
+        advisor.analyze_responses()
+        advisor.display_recommendations()
+        "
+    
+    - name: Demo Original Chatbot Responses
       run: |
         python -c "
         import sys
         sys.path.append('src')
         from chatbot.bot import ChatBot
         
-        print('🤖 CNO Insurance Chatbot Demo')
+        print('🤖 Original CNO Insurance Chatbot Demo')
         print('=' * 40)
         
         bot = ChatBot()

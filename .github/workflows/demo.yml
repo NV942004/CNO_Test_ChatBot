@@ -1,0 +1,55 @@
+name: CNO Chatbot Demo
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Run Chatbot Tests
+      run: |
+        python -m pytest tests/ -v
+    
+    - name: Demo Chatbot Responses
+      run: |
+        python -c "
+        import sys
+        sys.path.append('src')
+        from chatbot.bot import ChatBot
+        
+        print('🤖 CNO Insurance Chatbot Demo')
+        print('=' * 40)
+        
+        bot = ChatBot()
+        test_inputs = [
+            'Hello there!',
+            'What insurance do you offer?',
+            'I need life insurance recommendations',
+            'Tell me about health insurance',
+            'Thanks for your help'
+        ]
+        
+        for user_input in test_inputs:
+            response = bot.get_response(user_input)
+            print(f'👤 User: {user_input}')
+            print(f'🤖 Bot: {response}')
+            print('-' * 50)
+        "
